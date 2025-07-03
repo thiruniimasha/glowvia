@@ -12,9 +12,6 @@ import product_list_icon from "./product_list_icon.svg";
 import order_icon from "./order_icon.svg";
 import profile_icon from "./profile_icon.png";
 import menu_icon from "./menu_icon.svg";
-import coin_icon from "./coin_icon.svg";
-import box_icon from "./box_icon.svg";
-import trust_icon from "./trust_icon.svg";
 import black_arrow_icon from "./black_arrow_icon.svg";
 import white_arrow_icon from "./white_arrow_icon.svg";
 import add_address_iamge from "./add_address_image.svg";
@@ -79,12 +76,9 @@ export const assets = {
   order_icon,
   profile_icon,
   menu_icon,
-  coin_icon,
-  trust_icon,
   black_arrow_icon,
   white_arrow_icon,
   add_address_iamge,
-  box_icon,
   main_banner_bg,
   main_banner_bg_sm,
   cleanser_image,
