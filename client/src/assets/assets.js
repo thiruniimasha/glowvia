@@ -302,7 +302,7 @@ export const dummyProducts = [
   {
     _id: "gl02b01",
     name: "Rose Water Toner 200ml",
-    category: "Toners & Mists",
+    category: "toners-mists",
     price: 1200,
     offerPrice: 990,
     image:Rose_Water_Toner,
@@ -314,7 +314,7 @@ export const dummyProducts = [
   {
     _id: "gl02b02",
     name: "Green Tea Balancing Toner 150ml",
-    category: "Toners & Mists",
+    category: "toners-mists",
     price: 1350,
     offerPrice: 1180,
     image: Green_Tea_Balancing_Toner,
@@ -326,7 +326,7 @@ export const dummyProducts = [
   {
     _id: "gl02b03",
     name: "Hydrating Facial Mist 100ml",
-    category: "Toners & Mists",
+    category: "toners-mists",
     price: 1100,
     offerPrice: 990,
     image: Hydrating_Facial_Mist,
@@ -338,7 +338,7 @@ export const dummyProducts = [
   {
     _id: "gl02b04",
     name: "Vitamin C Brightening Toner 150ml",
-    category: "Toners & Mists",
+    category: "toners-mists",
     price: 1500,
     offerPrice: 1320,
     image: Vitamin_C_Brightening_Toner,
@@ -478,7 +478,7 @@ export const dummyProducts = [
   {
     _id: "gl06f01",
     name: "Charcoal Purifying Face Mask 100g",
-    category: "Masks",
+    category: "masks-exfoliators",
     price: 2000,
     offerPrice: 1780,
     image: Charcoal_Purifying_Face_Mask,
@@ -490,7 +490,7 @@ export const dummyProducts = [
   {
     _id: "gl06f02",
     name: "Hydrating Sheet Mask (5 Pack)",
-    category: "Masks",
+    category: "masks-exfoliators",
     price: 1800,
     offerPrice: 1600,
     image: Hydrating_Sheet_Mask,
@@ -504,7 +504,7 @@ export const dummyProducts = [
   {
     _id: "gl07g01",
     name: "Revitalizing Eye Cream 15ml",
-    category: "Lip & Eye Care",
+    category: "lip-eye-care",
     price: 2700,
     offerPrice: 2390,
     image: Revitalizing_Eye_Cream,
@@ -516,7 +516,7 @@ export const dummyProducts = [
   {
     _id: "gl07g02",
     name: "Brightening Eye Serum 20ml",
-    category: "Lip & Eye Care",
+    category: "lip-eye-care",
     price: 2550,
     offerPrice: 2290,
     image: Brightening_Eye_Serum,
@@ -530,7 +530,7 @@ export const dummyProducts = [
   {
     _id: "gl08h01",
     name: "Hydrating Lip Balm - Strawberry 10g",
-    category: "Lip & Eye Care",
+    category: "lip-eye-care",
     price: 750,
     offerPrice: 650,
     image: Hydrating_Lip_Balm_Strawberry,
@@ -542,7 +542,7 @@ export const dummyProducts = [
   {
     _id: "gl08h02",
     name: "SPF Lip Balm - Mint 10g",
-    category: "Lip & Eye Care",
+    category: "lip-eye-care",
     price: 850,
     offerPrice: 720,
     image: SPF_Lip_Balm_Mint,
@@ -556,7 +556,7 @@ export const dummyProducts = [
   {
     _id: "gl10j01",
     name: "Glowvia Essentials Gift Box",
-    category: "Gift Sets",
+    category: "gift-sets",
     price: 7500,
     offerPrice: 6850,
     image:Glowvia_Essentials_Gift_Box,
@@ -568,7 +568,7 @@ export const dummyProducts = [
   {
     _id: "gl10j02",
     name: "Self-Care Spa Kit",
-    category: "Gift Sets",
+    category: "gift-sets",
     price: 9200,
     offerPrice: 8450,
     image: SelfCare_Spa_Kit,
@@ -580,7 +580,7 @@ export const dummyProducts = [
   {
     _id: "gl10j03",
     name: "Mini Glow Travel Set",
-    category: "Gift Sets",
+    category: "gift-sets",
     price: 4200,
     offerPrice: 3900,
     image: Mini_Glow_Travel_Set,
