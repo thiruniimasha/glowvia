@@ -17,7 +17,7 @@ export function AppContextProvider({ children }) {
 function AppContextWrapper({ children }) {
   const currency = import.meta.env.VITE_CURRENCY;
   const navigate = useNavigate();
-  const [user, setuser] = useState(null);
+  const [user, setUser] = useState(null);
   const [isSeller, setIsSeller] = useState(false);
   const [showUserLogin, setShowUserLogin] = useState(false);
   const [products, setProducts] = useState([]);
@@ -72,7 +72,7 @@ function AppContextWrapper({ children }) {
   const value = {
     navigate,
     user,
-    setuser,
+    setUser,
     isSeller,
     setIsSeller,
     showUserLogin,
