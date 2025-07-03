@@ -22,6 +22,7 @@ function AppContextWrapper({ children }) {
   const [showUserLogin, setShowUserLogin] = useState(false);
   const [products, setProducts] = useState([]);
   const [cartItems, setCartItems] = useState([]);
+  const [searchQuery, setSearchQuery] = useState([]);
 
   //fetch all products
   const fetchProducts = async () => {
@@ -82,7 +83,9 @@ function AppContextWrapper({ children }) {
     addToCart,
     updateCartItem,
     removeFromCart,
-    cartItems
+    cartItems,
+    setSearchQuery,
+    searchQuery
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
