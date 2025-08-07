@@ -60,6 +60,7 @@ import delivery_truck_icon from "./delivery_truck_icon.png";
 import leaf_nature_icon from "./leaf_nature_icon.png";
 import skincare_icon from "./skincare_icon.png";
 import upload_area from "./upload_area.png";
+import box_icon from "./box_icon.png";
 
 
 export const assets = {
@@ -125,6 +126,7 @@ export const assets = {
   leaf_nature_icon,
   skincare_icon,
   upload_area,
+  box_icon,
 
 
 
