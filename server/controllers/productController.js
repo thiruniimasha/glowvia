@@ -1,5 +1,7 @@
 import { v2 as cloudinary} from "cloudinary"
 import Product from "../models/Product.js"
+
+
 //Add product : /api/product/add
 export const addProduct = async (req , res) => {
     try{
@@ -14,7 +16,7 @@ export const addProduct = async (req , res) => {
             })
         )
 
-        await Product.create({...productData, images: imagesUrl})
+        await Product.create({...productData, image: imagesUrl})
 
         res.json({success: true, message: "Product Added"})
 
@@ -56,7 +58,7 @@ export const changeStock = async (req , res) => {
     try{
         const { id, inStock } = req.body
         await Product.findByIdAndUpdate(id,{inStock})
-        res.json({success: true, message: error.message })
+        res.json({success: true, message: "Stock updated" })
 
     }catch (error) {
         console.log(error.message);
