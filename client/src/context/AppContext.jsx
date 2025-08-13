@@ -30,31 +30,40 @@ function AppContextWrapper({ children }) {
 
   //fetch seller status
   const fetchSeller = async () => {
-    try{
-      const {data} = await axios.get('/api/seller/is-auth')
-      if(data.success){
+    try {
+      const { data } = await axios.get('/api/seller/is-auth')
+      if (data.success) {
         setIsSeller(true)
-      }else {
+      } else {
         setIsSeller(false)
       }
-    } catch (error){
+    } catch (error) {
       setIsSeller(false)
     }
   }
 
   //fetch all products
   const fetchProducts = async () => {
-    setProducts(dummyProducts);
+    try {
+      const { data } = await axios.get('/api/product/list')
+      if (data.success) {
+        setProducts(data.products)
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message)
+    }
   }
 
   //add product to cart
   const addToCart = (itemId) => {
     let cartData = structuredClone(cartItems);
 
-    if(cartData[itemId]){
+    if (cartData[itemId]) {
       cartData[itemId] += 1;
 
-    }else{
+    } else {
       cartData[itemId] = 1;
     }
     setCartItems(cartData);
@@ -72,9 +81,9 @@ function AppContextWrapper({ children }) {
   //remove item from cart
   const removeFromCart = (itemId) => {
     let cartData = structuredClone(cartItems);
-    if(cartData[itemId]){
+    if (cartData[itemId]) {
       cartData[itemId] -= 1;
-      if(cartData[itemId] === 0){
+      if (cartData[itemId] === 0) {
         delete cartData[itemId];
       }
     }
@@ -83,20 +92,20 @@ function AppContextWrapper({ children }) {
   }
 
   //get cart count
-  const getCartCount = ()=>{
+  const getCartCount = () => {
     let totalCount = 0;
-    for(const item in cartItems){
+    for (const item in cartItems) {
       totalCount += cartItems[item];
     }
     return totalCount;
   }
 
   //total cart amount
-  const getCartAmount = ()=>{
+  const getCartAmount = () => {
     let totalAmount = 0;
-    for(const items in cartItems){
-      let itemInfo = products.find((product)=> product._id === items);
-      if(cartItems[items] > 0){
+    for (const items in cartItems) {
+      let itemInfo = products.find((product) => product._id === items);
+      if (cartItems[items] > 0) {
         totalAmount += itemInfo.offerPrice * cartItems[items]
       }
     }
@@ -128,7 +137,8 @@ function AppContextWrapper({ children }) {
     searchQuery,
     getCartAmount,
     getCartCount,
-    axios
+    axios,
+    fetchProducts,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
