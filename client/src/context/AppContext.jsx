@@ -1,32 +1,23 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { dummyProducts } from "../assets/assets";
 import toast from "react-hot-toast";
 import axios from "axios";
 
 axios.defaults.withCredentials = true;
 axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
 
-const AppContext = createContext();
+export const AppContext = createContext();
 
-export function AppContextProvider({ children }) {
-  return (
-    <AppContextWrapper>
-      {children}
-    </AppContextWrapper>
-  );
-}
-
-// Wrapper for useNavigate() to avoid Vite HMR crash
-function AppContextWrapper({ children }) {
+export const AppContextProvider = ({ children }) => {
+  
   const currency = import.meta.env.VITE_CURRENCY;
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [isSeller, setIsSeller] = useState(false);
   const [showUserLogin, setShowUserLogin] = useState(false);
   const [products, setProducts] = useState([]);
-  const [cartItems, setCartItems] = useState([]);
-  const [searchQuery, setSearchQuery] = useState([]);
+  const [cartItems, setCartItems] = useState({});
+  const [searchQuery, setSearchQuery] = useState({});
 
   //fetch seller status
   const fetchSeller = async () => {
@@ -39,6 +30,19 @@ function AppContextWrapper({ children }) {
       }
     } catch (error) {
       setIsSeller(false)
+    }
+  }
+
+  //fetch user auth status, user data and cart items
+  const fetchUser = async () => {
+    try {
+      const { data } = await axios.get('/api/user/is-auth')
+      if (data.success) {
+        setUser(data.user)
+        setCartItems(data.user.cartItems)
+      }
+    } catch (error) {
+      setUser(null)
     }
   }
 
@@ -115,8 +119,9 @@ function AppContextWrapper({ children }) {
 
 
   useEffect(() => {
-    fetchSeller();
-    fetchProducts();
+    fetchUser()
+    fetchSeller()
+    fetchProducts()
   }, []);
 
   const value = {
@@ -144,6 +149,6 @@ function AppContextWrapper({ children }) {
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
 
-export function useAppContext() {
+export const useAppContext = () => {
   return useContext(AppContext);
 }

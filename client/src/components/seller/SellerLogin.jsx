@@ -1,6 +1,5 @@
 import React, {use, useState, useEffect} from 'react'
 import { useAppContext } from '../../context/AppContext';
-import axios from 'axios';
 import toast from 'react-hot-toast';
 
 const SellerLogin = () => {
