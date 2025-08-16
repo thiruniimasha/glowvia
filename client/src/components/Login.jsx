@@ -2,14 +2,14 @@ import React from 'react'
 import { useAppContext } from '../context/AppContext';
 import toast from 'react-hot-toast';
 
-function Login() {
+const Login = () => {
 
-    const { setShowUserLogin, setUser, axios, navigate } = useAppContext()
+    const { setShowUserLogin, setUser, axios, navigate } = useAppContext();
 
     const [state, setState] = React.useState("login");
-    const [name, setName] = React.useState('');
-    const [email, setEmail] = React.useState('');
-    const [password, setPassword] = React.useState('');
+    const [name, setName] = React.useState("");
+    const [email, setEmail] = React.useState("");
+    const [password, setPassword] = React.useState("");
 
     const onSubmitHandler = async (event) => {
         try {
@@ -23,6 +23,7 @@ function Login() {
                 navigate('/')
                 setUser(data.user)
                 setShowUserLogin(false)
+                 
             } else {
                 toast.error(data.message)
             }
