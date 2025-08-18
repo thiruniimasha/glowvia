@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react"
 import { useAppContext } from "../context/AppContext"
 import { assets, dummyAddress } from "../assets/assets"
+import toast from "react-hot-toast"
 
 const Cart = () => {
-    const { products, currency, cartItems, removeFromCart, getCartCount, updateCartItem, navigate, getCartAmount } = useAppContext()
+    const { products, currency, cartItems, removeFromCart, getCartCount, updateCartItem, navigate, getCartAmount, axios, user } = useAppContext()
 
     const [cartArray, setCartArray] = useState([])
-    const [addresses, setAddresses] = useState(dummyAddress)
+    const [addresses, setAddresses] = useState([])
     const [showAddress, setShowAddress] = useState(false)
-    const [selectedAddress, setSelectedAddress] = useState(dummyAddress[0])
+    const [selectedAddress, setSelectedAddress] = useState(null)
     const [paymentOption, setPaymentOption] = useState("COD")
 
     const getCart = () => {
@@ -21,7 +22,24 @@ const Cart = () => {
         setCartArray(tempArray)
     }
 
-    const placeOrder = async ()=>{
+    const getUserAddress = async () => {
+        try {
+            const { data } = await axios.get('/api/address/get');
+            if (data.success) {
+                setAddresses(data.addresses)
+                if (data.addresses.length > 0) {
+                    setSelectedAddress(data.addresses[0])
+                }
+            } else {
+                toast.error(data.message)
+            }
+
+        } catch (error) {
+            toast.error(error.message)
+        }
+    }
+
+    const placeOrder = async () => {
 
     }
 
@@ -31,6 +49,13 @@ const Cart = () => {
         }
 
     }, [products, cartItems])
+
+    useEffect(() => {
+        if (user) {
+            getUserAddress()
+        }
+
+    }, [user])
 
 
     return products.length > 0 && cartItems ? (
@@ -95,10 +120,17 @@ const Cart = () => {
                         {showAddress && (
                             <div className="absolute top-12 py-1 bg-white border border-gray-300 text-sm w-full">
                                 {addresses.map((address, index) =>
-                                (<p onClick={() => setShowAddress(false)}
-                                    className="text-gray-500 p-2 hover:bg-gray-100">
-                                    {address.street}, {address.city}, {address.state},{address.country}
-                                </p>
+                                (
+                                    <p
+                                        key={address._id}
+                                        onClick={() => {
+                                            setSelectedAddress(address);
+                                            setShowAddress(false);
+                                        }}
+                                        className={`text-gray-500 p-2 hover:bg-gray-100 cursor-pointer ${selectedAddress?._id === address._id ? 'bg-gray-100' : ''
+                                            }`}>
+                                        {address.street}, {address.city}, {address.state},{address.country}
+                                    </p>
                                 ))}
                                 <p onClick={() => navigate("/add-address")} className="text-primary text-center cursor-pointer p-2 hover:bg-primary/10">
                                     Add address
@@ -125,15 +157,15 @@ const Cart = () => {
                         <span>Shipping Fee</span><span className="text-green-600">Free</span>
                     </p>
                     <p className="flex justify-between">
-                        <span>Tax (2%)</span><span>{currency} {getCartAmount()*2/100}</span>
+                        <span>Tax (2%)</span><span>{currency} {getCartAmount() * 2 / 100}</span>
                     </p>
                     <p className="flex justify-between text-lg font-medium mt-3">
-                        <span>Total Amount:</span><span>{currency} {getCartAmount()+ getCartAmount()*2/100} </span>
+                        <span>Total Amount:</span><span>{currency} {getCartAmount() + getCartAmount() * 2 / 100} </span>
                     </p>
                 </div>
 
                 <button className="w-full py-3 mt-6 cursor-pointer bg-primary text-white font-medium hover:bg-primary-dull transition">
-                   {paymentOption === "COD" ? "Place Order" : "Proceed to Checkout"}
+                    {paymentOption === "COD" ? "Place Order" : "Proceed to Checkout"}
                 </button>
             </div>
         </div>
