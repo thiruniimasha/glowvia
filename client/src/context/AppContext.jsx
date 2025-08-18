@@ -9,7 +9,7 @@ axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
 export const AppContext = createContext();
 
 export const AppContextProvider = ({ children }) => {
-  
+
   const currency = import.meta.env.VITE_CURRENCY;
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -18,6 +18,13 @@ export const AppContextProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [cartItems, setCartItems] = useState({});
   const [searchQuery, setSearchQuery] = useState({});
+
+  useEffect(() => {
+    fetchUser()
+    fetchSeller()
+    fetchProducts()
+  }, [])
+
 
   //fetch seller status
   const fetchSeller = async () => {
@@ -36,14 +43,37 @@ export const AppContextProvider = ({ children }) => {
   //fetch user auth status, user data and cart items
   const fetchUser = async () => {
     try {
-      const { data } = await axios.get('/api/user/is-auth')
+      const { data } = await axios.get('/api/user/is-auth');
       if (data.success) {
-        setUser(data.user)
-        setCartItems(data.user.cartItems)
+        setUser(data.user);
+        // Set cart items from user data
+        if (data.user.cartItems) {
+          setCartItems(data.user.cartItems);
+        }
+      } else {
+        setUser(null);
+        setCartItems({}); // Clear cart on failed auth
       }
     } catch (error) {
-      setUser(null)
+      setUser(null);
+      setCartItems({});
+      console.error("Auth error:", error);
     }
+  };
+
+  const handleUserChange = (userData) => {
+    if (userData) {
+      setUser(userData);
+        setCartItems(userData.cartItems || {});
+      
+    } else {
+      setUser(null);
+      setCartItems({}); // Clear cart when logging out
+    }
+  }
+
+  const clearCart = () => {
+    setCartItems({});
   }
 
   //fetch all products
@@ -118,16 +148,29 @@ export const AppContextProvider = ({ children }) => {
 
 
 
+  
+  //update database cart items
   useEffect(() => {
-    fetchUser()
-    fetchSeller()
-    fetchProducts()
-  }, []);
+     if (user && Object.keys(cartItems).length > 0) {
+    const updateCart = async () => {
+      try {
+       await axios.post('/api/cart/update', { cartItems });
+       
+      } catch (error) {
+        console.error("Failed to update cart:", error);
+      }
+    };
+
+      updateCart();
+  }
+    
+
+  }, [cartItems, user]);
+
 
   const value = {
     navigate,
     user,
-    setUser,
     isSeller,
     setIsSeller,
     showUserLogin,
@@ -144,6 +187,8 @@ export const AppContextProvider = ({ children }) => {
     getCartCount,
     axios,
     fetchProducts,
+    setUser: handleUserChange,
+    clearCart,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
@@ -152,3 +197,4 @@ export const AppContextProvider = ({ children }) => {
 export const useAppContext = () => {
   return useContext(AppContext);
 }
+
