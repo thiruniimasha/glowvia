@@ -7,7 +7,7 @@ const orderSchema = new mongoose.Schema({
         required: true
     },
     items: [{
-        productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+        productId: { type: mongoose.Schema.Types.ObjectId, ref: 'product' },
         quantity: Number,
         name: String,
         price: Number,
@@ -15,7 +15,7 @@ const orderSchema = new mongoose.Schema({
     }],
     amount: { type: Number, required: true },
     address: { type: mongoose.Schema.Types.ObjectId,
-        ref: 'Address',
+        ref: 'address',
         required: true },
     status: { type: String, default: 'Order Placed' },
     paymentType: { type: String,
@@ -25,6 +25,4 @@ const orderSchema = new mongoose.Schema({
 
 }, { timestamps: true })
 
-const Order = mongoose.models.order || mongoose.model('order', orderSchema)
-
-export default Order
+export default mongoose.model('Order', orderSchema);

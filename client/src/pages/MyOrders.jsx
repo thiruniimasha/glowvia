@@ -1,19 +1,34 @@
 import React, { useEffect, useState } from 'react'
 import { useAppContext } from '../context/AppContext'
-import { dummyAddress, dummyOrders } from '../assets/assets'
-
 function MyOrders() {
 
     const [MyOrders, setMyOrders] = useState([])
-    const { currency } = useAppContext()
+    const { currency, axios, user } = useAppContext()
 
     const fetchMyOrders = async () => {
-        setMyOrders(dummyOrders)
+        try {
+            const { data } = await axios.get('/api/order/user')
+            console.log('API Response:', data)
+            if (data.success) {
+                setMyOrders(data.orders)
+            }
+
+        } catch (error) {
+            console.log(error)
+             toast.error('Failed to fetch orders')
+
+        }
     }
 
     useEffect(() => {
-        fetchMyOrders()
-    }, [])
+        if (user) {
+            fetchMyOrders()
+
+        }
+
+    }, [user])
+
+
 
     return (
         <div className='mt-16 pb-16'>
@@ -24,8 +39,8 @@ function MyOrders() {
                 <div className='w-16 h-0.5 bg-primary rounded-full'></div>
             </div>
 
-            {MyOrders.map((order, index) => (
-                <div key={index} className='w-full max-w-4xl border border-gray-300 rounded-lg mb-10 p-4 py-5'>
+            {MyOrders && MyOrders.map((order) => (
+                <div key={order._id} className='w-full max-w-4xl border border-gray-300 rounded-lg mb-10 p-4 py-5'>
                     <p className='flex justify-between flex-wrap text-gray-500 text-sm font-medium mb-4'>
                         <span>
                             Order ID: {order._id}
@@ -37,20 +52,20 @@ function MyOrders() {
                             Total Amount: {currency} {order.amount}
                         </span>
                     </p>
-                    {order.items.map((item, index) => (
+                    {order.items && order.items.map((item, index) => (
 
                         <div key={index}
-                        className={`relative bg-white text-gray-500/70 ${order.items.length !== index + 1 && "border-b"} border-gray-300 flex flex-col md:flex-row md:items-center justify-between p-4 py-5 md:gap-16 w-full max-w-4xl`}>
+                            className={`relative bg-white text-gray-500/70 ${order.items.length !== index + 1 && "border-b"} border-gray-300 flex flex-col md:flex-row md:items-center justify-between p-4 py-5 md:gap-16 w-full max-w-4xl`}>
                             <div className='flex items-center gap-4'>
                                 <div className='bg-primary/10 p-3 rounded-lg'>
-                                    <img src={item.product.image[0]} alt="" className='w-16 h-16' />
+                                    <img src={item.productId?.image[0]} alt="" className='w-16 h-16' />
                                 </div>
                                 <div className='ml-4'>
                                     <h2 className='text-lg font-semibold text-gray-800'>
-                                        {item.product.name}
+                                        {item.productId?.name}
                                     </h2>
                                     <p>
-                                        Category: {item.product.category}
+                                        Category: {item.productId?.category}
                                     </p>
                                 </div>
                             </div>
@@ -70,7 +85,7 @@ function MyOrders() {
 
                             </div>
                             <p className='text-primary text-lg font-medium'>
-                                Amount : {currency}{item.product.offerPrice * item.quantity}
+                                Amount : {currency}{item.productId?.offerPrice * item.quantity}
                             </p>
 
                         </div>
