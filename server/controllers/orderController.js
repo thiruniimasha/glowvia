@@ -47,9 +47,9 @@ export const placeOrderCOD = async (req, res) => {
             paymentType: "COD",
         });
 
-         await User.findByIdAndUpdate(userId, { $set: { cartItems: {} } });
+        await User.findByIdAndUpdate(userId, { $set: { cartItems: {} } });
 
-        
+
 
         return res.json({ success: true, message: "Order Placed Successfully" })
     } catch (error) {
@@ -80,11 +80,19 @@ export const getUserOrders = async (req, res) => {
 //get all orders (for seller/admin) : api/order/seller
 export const getAllOrders = async (req, res) => {
     try {
+        console.log('Fetching all orders...');
         const orders = await Order.find({
-            $or: [{ paymentType: "COD" }, { ispaid: true }]
-        }).populate("items.product address").sort({ createdAt: -1 });
+            $or: [{ paymentType: "COD" }, { isPaid: true }]
+        }).populate('items.productId')
+        .populate('address')
+        .sort({ createdAt: -1 });
+
+        console.log('Found orders:', orders); 
+
+
         res.json({ success: true, orders })
     } catch (error) {
+         console.error('Get all orders error:', error);
         res.json({ success: false, message: error.message })
     }
 }
