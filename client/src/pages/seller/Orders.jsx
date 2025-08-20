@@ -1,18 +1,37 @@
 import React, { useEffect, useState } from 'react'
 import { useAppContext } from '../../context/AppContext'
-import { assets, dummyAddress, dummyOrders } from '../../assets/assets'
+import toast from 'react-hot-toast'
+import { assets } from '../../assets/assets'
 
 const Orders = () => {
-    const { currency } = useAppContext()
+    const { currency, axios } = useAppContext()
     const [orders, setOrders] = useState([])
 
     const fetchOrders = async () => {
-        setOrders(dummyOrders)
+        try{
+           
+            console.log('Fetching seller orders...'); 
+            const {data} = await axios.get('/api/order/seller');
+             console.log('Seller orders response:', data);
+            if(data.success){
+                setOrders(data.orders)
+               
+            }else {
+                toast.error(data.message)
+            }
+
+        } catch (error){
+             console.error('Fetch orders error:', error);
+             toast.error(error.message)
+
+        }
     };
 
     useEffect(() => {
         fetchOrders();
     }, [])
+
+    
 
     return (
         <div className='no-scrollbar flex-1 h-[95vh] overflow-y-scroll'>
@@ -26,7 +45,7 @@ const Orders = () => {
                                 {order.items.map((item, index) => (
                                     <div key={index} className="flex flex-col">
                                         <p className="font-medium">
-                                            {item.product.name} {" "}
+                                            {item.name} {" "}
                                             <span className="text-primary">x {item.quantity}</span>
                                         </p>
                                     </div>
@@ -44,6 +63,7 @@ const Orders = () => {
                             <p>{order.address.phone}</p>
                         </div>
 
+                      
                         <p className="font-medium text-lg my-auto">
                         {currency}{order.amount}</p>
 
