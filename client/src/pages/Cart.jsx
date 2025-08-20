@@ -4,7 +4,7 @@ import { assets, dummyAddress } from "../assets/assets"
 import toast from "react-hot-toast"
 
 const Cart = () => {
-    const { products, currency, cartItems, removeFromCart, getCartCount, updateCartItem, navigate, getCartAmount, axios, user } = useAppContext()
+    const { products, currency, cartItems, removeFromCart, getCartCount, updateCartItem, navigate, getCartAmount, axios, user, setCartItems } = useAppContext()
 
     const [cartArray, setCartArray] = useState([])
     const [addresses, setAddresses] = useState([])
@@ -40,6 +40,36 @@ const Cart = () => {
     }
 
     const placeOrder = async () => {
+        try {
+            if (!selectedAddress) {
+                return toast.error("Please select an address")
+            }
+
+            // Format items for the order
+            const orderItems = cartArray.map(item => ({
+                productId: item._id,
+                quantity: item.quantity
+            }));
+
+            // cod
+            if (paymentOption === "COD") {
+                const { data } = await axios.post('/api/order/cod', {
+                    userId: user._id,
+                    items: orderItems,
+                    address: selectedAddress._id,
+                })
+
+                if (data.success) {
+                    toast.success(data.message)
+                    setCartItems({})
+                    navigate('/my-orders')
+                } else {
+                    toast.error(data.message)
+                }
+            }
+        } catch {
+            toast.error(error.message)
+        }
 
     }
 
@@ -164,7 +194,9 @@ const Cart = () => {
                     </p>
                 </div>
 
-                <button className="w-full py-3 mt-6 cursor-pointer bg-primary text-white font-medium hover:bg-primary-dull transition">
+                <button
+                    onClick={placeOrder}
+                    className="w-full py-3 mt-6 cursor-pointer bg-primary text-white font-medium hover:bg-primary-dull transition">
                     {paymentOption === "COD" ? "Place Order" : "Proceed to Checkout"}
                 </button>
             </div>
