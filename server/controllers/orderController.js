@@ -5,27 +5,47 @@ import Product from "../models/Product.js";
 // place order COD : /api/order/cod
 export const placeOrderCOD = async (req, res) =>{
     try{
-        const{ userId, items, address} = req.body;
+        const{ items, address} = req.body;
+        const userId = req.user.id;
+
         if(!address || items.length === 0){
-            return res.json({success: false, message: "Invalid Data0"})
+            return res.json({success: false, message: "Invalid Data"})
         }
 
         //Calculate amount using items
-        let amount = await items.reduce(async (acc, item) =>{
-            const product = await Product.offerPrice * item.quantity;
-        }, 0)
+        let amount = 0;
+        const orderItems = [];
+        for(const item of items){
+             const product = await Product.findById(item.productId);
+             if(!product) {
+                return res.json({ success: false, message: `Product not found : ${item.productId}`});
+             }
+
+             const itemTotal = product.offerPrice* item.quantity;
+             amount += itemTotal;
+
+             orderItems.push({
+                productId: product._id,
+                quantity: item.quantity,
+                name: product.name,
+                price: product.offerPrice,
+                image: product.image[0]
+             });
+        }
+           
+        
 
         //add tax charge(2%)
         amount += Math.floor(amount * 0.02);
         await Order.create({
             userId,
-            items,
+            items: orderItems,
             amount,
             address,
             paymentType: "COD",
         });
 
-        return res.json({success:true, message: "Order Places Successfully"})
+        return res.json({success:true, message: "Order Placed Successfully"})
     } catch (error) {
         console.log(error.message);
         res.json({ success: false, message: error.message})

@@ -189,6 +189,7 @@ export const AppContextProvider = ({ children }) => {
     fetchProducts,
     setUser: handleUserChange,
     clearCart,
+    setCartItems,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
