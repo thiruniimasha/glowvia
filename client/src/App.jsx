@@ -6,6 +6,7 @@ import { Toaster } from 'react-hot-toast'
 import Footer from './components/Footer'
 import { useAppContext } from './context/AppContext'
 import Login from './components/Login'
+import UserProfile from './pages/UserProfile'
 import AllProduct from './pages/AllProduct'
 import ProductCategory from './pages/ProductCategory'
 import ProductDetails from './pages/ProductDetails'
@@ -42,6 +43,7 @@ function App() {
           <Route path='/cart' element={<Cart />} />
           <Route path='/add-address' element={<AddAddress />} />
           <Route path='/my-orders' element={<MyOrders />} />
+          <Route path='/profile' element={<UserProfile />} />
           <Route path='/loader' element={<Loading />} />
 
           <Route path='/seller' element={isSeller ? <SellerLayout/> : <SellerLogin />}>
