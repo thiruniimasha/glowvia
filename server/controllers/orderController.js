@@ -78,10 +78,12 @@ export const placeOrderStripe = async (req, res) => {
         const orderItems = [];
         for (const item of items) {
             const product = await Product.findById(item.productId);
+
             productData.push({
                 name: product.name,
                 price: product.offerPrice,
                 quantity: item.quantity,
+                image: product.image[0]
             });
 
             if (!product) {
@@ -90,6 +92,14 @@ export const placeOrderStripe = async (req, res) => {
 
             const itemTotal = product.offerPrice * item.quantity;
             amount += itemTotal;
+
+            orderItems.push({
+                productId: product._id,
+                quantity: item.quantity,
+                name: product.name,
+                price: product.offerPrice,
+                image: product.image[0]
+            });
 
 
         }
@@ -206,47 +216,47 @@ export const stripeWebhooks = async (request, response) => {
             console.error(`Unhandled event type ${event.type}`)
             break;
 
-        }
-        response.json({received: true})
-
-
     }
-
-    //get orders by user id : /api/order/user
-    export const getUserOrders = async (req, res) => {
-        try {
-            const userId = req.user.id;
-            const orders = await Order.find({
-                userId
-            }).populate('items.productId', 'name image category offerPrice')
+    response.json({ received: true })
 
 
-                .populate('address')
-                .sort({ createdAt: -1 });
+}
 
-            res.json({ success: true, orders })
-        } catch (error) {
-            console.error('Get orders error:', error);
-            res.json({ success: false, message: error.message })
-        }
+//get orders by user id : /api/order/user
+export const getUserOrders = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const orders = await Order.find({
+            userId
+        }).populate('items.productId', 'name image category offerPrice')
+
+
+            .populate('address')
+            .sort({ createdAt: -1 });
+
+        res.json({ success: true, orders })
+    } catch (error) {
+        console.error('Get orders error:', error);
+        res.json({ success: false, message: error.message })
     }
+}
 
-    //get all orders (for seller/admin) : api/order/seller
-    export const getAllOrders = async (req, res) => {
-        try {
-            console.log('Fetching all orders...');
-            const orders = await Order.find({
-                $or: [{ paymentType: "COD" }, { isPaid: true }]
-            }).populate('items.productId')
-                .populate('address')
-                .sort({ createdAt: -1 });
+//get all orders (for seller/admin) : api/order/seller
+export const getAllOrders = async (req, res) => {
+    try {
+        console.log('Fetching all orders...');
+        const orders = await Order.find({
+            $or: [{ paymentType: "COD" }, { isPaid: true }]
+        }).populate('items.productId')
+            .populate('address')
+            .sort({ createdAt: -1 });
 
-            console.log('Found orders:', orders);
+        console.log('Found orders:', orders);
 
 
-            res.json({ success: true, orders })
-        } catch (error) {
-            console.error('Get all orders error:', error);
-            res.json({ success: false, message: error.message })
-        }
+        res.json({ success: true, orders })
+    } catch (error) {
+        console.error('Get all orders error:', error);
+        res.json({ success: false, message: error.message })
     }
+}

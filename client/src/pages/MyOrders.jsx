@@ -40,7 +40,7 @@ function MyOrders() {
             </div>
 
             {MyOrders && MyOrders.map((order) => (
-                <div key={order._id} className='w-full max-w-4xl border border-gray-300 rounded-lg mb-10 p-4 py-5'>
+                <div key={order._id} className='w-full max-w-5xl border border-gray-300 rounded-lg mb-10 p-4 py-5'>
                     <p className='flex justify-between flex-wrap text-gray-500 text-sm font-medium mb-4'>
                         <span>
                             Order ID: {order._id}
@@ -55,7 +55,7 @@ function MyOrders() {
                     {order.items && order.items.map((item, index) => (
 
                         <div key={index}
-                            className={`relative bg-white text-gray-500/70 ${order.items.length !== index + 1 && "border-b"} border-gray-300 flex flex-col md:flex-row md:items-center justify-between p-4 py-5 md:gap-16 w-full max-w-4xl`}>
+                            className={`relative bg-white text-gray-500/70 ${order.items.length !== index + 1 && "border-b"} border-gray-300 flex flex-col md:flex-row md:items-center justify-between p-4 py-5 md:gap-16 w-full max-w-5xl`}>
                             <div className='flex items-center gap-4'>
                                 <div className='bg-primary/10 p-3 rounded-lg'>
                                     <img src={item.productId?.image[0]} alt="" className='w-16 h-16' />

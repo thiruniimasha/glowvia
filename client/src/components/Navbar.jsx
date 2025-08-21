@@ -89,11 +89,11 @@ function Navbar() {
 
             {/* Mobile Menu */}
             {open && (
-                <div className={`${open ? 'flex' : 'hidden'} absolute top-[60px] left-0 w-full bg-white shadow-md py-4 flex-col items-start gap-2 px-5 text-sm md:hidden`}>
+                <div className={`${open ? 'flex' : 'hidden'} absolute top-[100px] right-0 w-1/4 bg-white shadow-md py-4 flex-col items-center gap-2 px-5 text-sm md:hidden z-50`}>
                     <NavLink to='/' onClick={() => setOpen(false)}>Home</NavLink>
                     <NavLink to='/products' onClick={() => setOpen(false)}>All Product</NavLink>
                     {user &&
-                        <NavLink to='/products' onClick={() => setOpen(false)}>My Orders</NavLink>
+                        <NavLink to='/my-orders' onClick={() => setOpen(false)}>My Orders</NavLink>
                     }
                     <NavLink to='/' onClick={() => setOpen(false)}>Contact</NavLink>
 
