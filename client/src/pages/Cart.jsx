@@ -150,7 +150,7 @@ const Cart = () => {
 
             </div>
 
-            <div className="max-w-[360px] w-full bg-gray-100/40 p-5 max-md:mt-16 border border-gray-300/70">
+            <div className="max-w-[500px] w-full bg-gray-100/40 p-5 max-md:mt-16 border border-gray-300/70">
                 <h2 className="text-xl md:text-xl font-medium">Order Summary</h2>
                 <hr className="border-gray-300 my-5" />
 
