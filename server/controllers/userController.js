@@ -6,9 +6,9 @@ import jwt from 'jsonwebtoken';
 //Register User : /api/user/register
 export const register = async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password,  contactNumber, country } = req.body;
 
-        if (!name || !email || !password) {
+        if (!name || !email || !password || !contactNumber || !country) {
             return res.json({ success: false, message: 'Missing Details' })
         }
         const existingUser = await User.findOne({ email })
@@ -18,7 +18,7 @@ export const register = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10)
 
-        const user = await User.create({ name, email, password: hashedPassword })
+        const user = await User.create({ name, email, password: hashedPassword, contactNumber, country })
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
@@ -29,7 +29,7 @@ export const register = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000  // Cookie expiration time
         })
 
-        return res.json({ success: true, user: { email: user.email, name: user.name } })
+        return res.json({ success: true, user: { email: user.email, name: user.name, contactNumber: user.contactNumber, country: user.country } })
 
     } catch (error) {
         console.error(error.message);
@@ -68,7 +68,7 @@ export const login = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000  // Cookie expiration time
         })
 
-        return res.json({ success: true, user: { email: user.email, name: user.name } })
+        return res.json({ success: true, user: { email: user.email, name: user.name, contactNumber: user.contactNumber, country: user.country } })
 
     } catch (error) {
         console.error(error.message);
@@ -88,6 +88,77 @@ export const isAuth = async (req, res) => {
         res.json({ success: false, message: error.message });
     }
 }
+
+//Get User Profile : /api/user/profile
+export const getUserProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select("-password");
+        
+        if (!user) {
+            return res.json({ success: false, message: 'User not found' });
+        }
+
+        return res.json({ 
+            success: true, 
+            user: {
+                name: user.name,
+                email: user.email,
+                contactNumber: user.contactNumber || '',
+                country: user.country || ''
+            }
+        });
+    } catch (error) {
+        console.error(error.message);
+        res.json({ success: false, message: error.message });
+    }
+};
+
+
+//Update User Profile : /api/user/profile
+export const updateUserProfile = async (req, res) => {
+    try {
+        const { name, contactNumber, country } = req.body;
+        const userId = req.user.id;
+
+        // Validate required fields
+        if (!name || name.trim() === '') {
+            return res.json({ success: false, message: 'Name is required' });
+        }
+
+        // Find and update user
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            {
+                name: name.trim(),
+                contactNumber: contactNumber || '',
+                country: country || ''
+            },
+            { 
+                new: true, // Return updated document
+                runValidators: true // Run schema validations
+            }
+        ).select("-password");
+
+        if (!updatedUser) {
+            return res.json({ success: false, message: 'User not found' });
+        }
+
+        return res.json({ 
+            success: true, 
+            message: 'Profile updated successfully',
+            user: {
+                name: updatedUser.name,
+                email: updatedUser.email,
+                contactNumber: updatedUser.contactNumber || '',
+                country: updatedUser.country || ''
+            }
+        });
+
+    } catch (error) {
+        console.error(error.message);
+        res.json({ success: false, message: error.message });
+    }
+};
 
 //Logout user : /api/user/logout
 
