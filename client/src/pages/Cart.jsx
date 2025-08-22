@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useAppContext } from "../context/AppContext"
-import { assets, dummyAddress } from "../assets/assets"
+import { assets } from "../assets/assets"
 import toast from "react-hot-toast"
 
 const Cart = () => {
@@ -11,6 +11,20 @@ const Cart = () => {
     const [showAddress, setShowAddress] = useState(false)
     const [selectedAddress, setSelectedAddress] = useState(null)
     const [paymentOption, setPaymentOption] = useState("COD")
+    const [deliveryDate, setDeliveryDate] = useState("")
+    const [deliveryTime, setDeliveryTime] = useState("10 AM")
+    const [deliveryLocation, setDeliveryLocation] = useState("")
+    const [message, setMessage] = useState("")
+
+    const districts = [
+        "Colombo", "Gampaha", "Kalutara", "Kandy", "Matale", "Nuwara Eliya",
+        "Galle", "Matara", "Hambantota", "Jaffna", "Kilinochchi", "Mannar",
+        "Vavuniya", "Mullaitivu", "Batticaloa", "Ampara", "Trincomalee",
+        "Kurunegala", "Puttalam", "Anuradhapura", "Polonnaruwa", "Badulla",
+        "Monaragala", "Ratnapura", "Kegalle"
+    ]
+
+    const deliveryTimes = ["10 AM", "11 AM", "12 PM"]
 
     const getCart = () => {
         let tempArray = []
@@ -39,17 +53,70 @@ const Cart = () => {
         }
     }
 
+    // Function to validate delivery date (no Sundays, not in the past)
+    const isValidDeliveryDate = (date) => {
+        const selectedDate = new Date(date)
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+
+        // Check if date is in the past
+        if (selectedDate < today) {
+            return false
+        }
+
+        // Check if it's Sunday (0 = Sunday)
+        if (selectedDate.getDay() === 0) {
+            return false
+        }
+
+        return true
+    }
+
+    const validatePurchaseInfo = () => {
+        if (!selectedAddress) {
+            toast.error("Please select a delivery address")
+            return false
+        }
+
+        if (!deliveryDate) {
+            toast.error("Please select a delivery date")
+            return false
+        }
+
+        if (!isValidDeliveryDate(deliveryDate)) {
+            toast.error("Delivery date cannot be in the past or on Sunday")
+            return false
+        }
+
+        if (!deliveryLocation) {
+            toast.error("Please select a delivery location (district)")
+            return false
+        }
+
+        return true
+    }
+
     const placeOrder = async () => {
         try {
-            if (!selectedAddress) {
-                return toast.error("Please select an address")
+            if (!validatePurchaseInfo()) {
+                return
             }
 
             // Format items for the order
             const orderItems = cartArray.map(item => ({
                 productId: item._id,
-                quantity: item.quantity
+                quantity: item.quantity,
+                productName: item.name
             }));
+
+            const purchaseInfo = {
+                username: user.name, // Authenticated user's username
+                deliveryDate,
+                deliveryTime,
+                deliveryLocation,
+                message: message.trim() || "", // Optional message
+                orderDate: new Date().toISOString() // Current date of purchase
+            }
 
             // cod
             if (paymentOption === "COD") {
@@ -57,6 +124,7 @@ const Cart = () => {
                     userId: user._id,
                     items: orderItems,
                     address: selectedAddress._id,
+                    purchaseInfo
                 })
 
                 if (data.success) {
@@ -66,16 +134,17 @@ const Cart = () => {
                 } else {
                     toast.error(data.message)
                 }
-            }else {
+            } else {
                 //place order with stripe
-                 const { data } = await axios.post('/api/order/stripe', {
+                const { data } = await axios.post('/api/order/stripe', {
                     userId: user._id,
                     items: orderItems,
                     address: selectedAddress._id,
+                    purchaseInfo
                 })
 
                 if (data.success) {
-                   window.location.replace(data.url)
+                    window.location.replace(data.url)
                 } else {
                     toast.error(data.message)
                 }
@@ -85,6 +154,13 @@ const Cart = () => {
             toast.error(error.message)
         }
 
+    }
+
+    // Get minimum date (tomorrow)
+    const getMinDate = () => {
+        const tomorrow = new Date()
+        tomorrow.setDate(tomorrow.getDate() + 1)
+        return tomorrow.toISOString().split('T')[0]
     }
 
     useEffect(() => {
@@ -154,7 +230,63 @@ const Cart = () => {
                 <h2 className="text-xl md:text-xl font-medium">Order Summary</h2>
                 <hr className="border-gray-300 my-5" />
 
+                {/* Customer Information */}
                 <div className="mb-6">
+                    <p className="text-sm font-medium uppercase mb-2">Customer Information</p>
+                    <p className="text-gray-600 text-sm">Name: {user?.name}</p>
+                </div>
+
+               
+
+                {/* Delivery Information */}
+                <div className="mb-6">
+                    <p className="text-sm font-medium uppercase mb-3">Delivery Information</p>
+
+                    {/* Delivery Date */}
+                    <div className="mb-3">
+                        <label className="block text-sm text-gray-600 mb-1">Delivery Date *</label>
+                        <input
+                            type="date"
+                            value={deliveryDate}
+                            onChange={(e) => setDeliveryDate(e.target.value)}
+                            min={getMinDate()}
+                            className="w-full border border-gray-300 bg-white px-3 py-2 rounded outline-none focus:border-primary"
+                            required
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Note: Delivery not available on Sundays</p>
+                    </div>
+
+                    {/* Delivery Time */}
+                    <div className="mb-3">
+                        <label className="block text-sm text-gray-600 mb-1">Preferred Delivery Time *</label>
+                        <select
+                            value={deliveryTime}
+                            onChange={(e) => setDeliveryTime(e.target.value)}
+                            className="w-full border border-gray-300 bg-white px-3 py-2 rounded outline-none focus:border-primary"
+                        >
+                            {deliveryTimes.map(time => (
+                                <option key={time} value={time}>{time}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Delivery Location */}
+                    <div className="mb-3">
+                        <label className="block text-sm text-gray-600 mb-1">Delivery District *</label>
+                        <select
+                            value={deliveryLocation}
+                            onChange={(e) => setDeliveryLocation(e.target.value)}
+                            className="w-full border border-gray-300 bg-white px-3 py-2 rounded outline-none focus:border-primary"
+                            required
+                        >
+                            <option value="">Select District</option>
+                            {districts.map(district => (
+                                <option key={district} value={district}>{district}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                     <div className="mb-6">
                     <p className="text-sm font-medium uppercase">Delivery Address</p>
                     <div className="relative flex justify-between items-start mt-2">
                         <p className="text-gray-500">{selectedAddress ? `${selectedAddress.street},${selectedAddress.city},${selectedAddress.state},${selectedAddress.country}` : "No address found"}</p>
@@ -182,7 +314,23 @@ const Cart = () => {
                             </div>
                         )}
                     </div>
+                </div>
 
+                    {/* Message */}
+                    <div className="mb-3">
+                        <label className="block text-sm text-gray-600 mb-1">Special Instructions (Optional)</label>
+                        <textarea
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            placeholder="Any special delivery instructions..."
+                            className="w-full border border-gray-300 bg-white px-3 py-2 rounded outline-none focus:border-primary resize-none"
+                            rows="3"
+                        />
+                    </div>
+                </div>
+
+
+                <div className="mb-6">
                     <p className="text-sm font-medium uppercase mt-6">Payment Method</p>
 
                     <select onChange={e => setPaymentOption(e.target.value)} className="w-full border border-gray-300 bg-white px-3 py-2 mt-2 outline-none">

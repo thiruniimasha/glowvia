@@ -11,7 +11,8 @@ const orderSchema = new mongoose.Schema({
         quantity: Number,
         name: String,
         price: Number,
-        image: String
+        image: String,
+         productName: String
     }],
     amount: { type: Number, required: true },
     address: { type: mongoose.Schema.Types.ObjectId,
@@ -22,6 +23,20 @@ const orderSchema = new mongoose.Schema({
         enum: ['COD', 'Online'],
         default: 'COD' },
     isPaid: { type: Boolean, required: true, default: false },
+
+    purchaseInfo: {
+        username: { type: String, required: true }, // Authenticated user's username
+        orderDate: { type: Date, default: Date.now }, // Date of purchase
+        deliveryDate: { type: Date, required: true }, // Preferred delivery date
+        deliveryTime: { 
+            type: String, 
+            enum: ['10 AM', '11 AM', '12 PM'], 
+            required: true 
+        }, 
+
+        deliveryLocation: { type: String, required: true }, // Preferred delivery location (district)
+        message: { type: String, default: '' } // Optional message/special instructions
+    }
 
 }, { timestamps: true })
 

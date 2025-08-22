@@ -1,100 +1,81 @@
 import React, { useEffect, useState } from 'react'
 import { useAppContext } from '../context/AppContext'
-function MyOrders() {
+import toast from 'react-hot-toast'
+import OrderDetails from '../components/OrderDetails'
 
-    const [MyOrders, setMyOrders] = useState([])
-    const { currency, axios, user } = useAppContext()
+const MyOrders = () => {
+    const { axios, user, navigate } = useAppContext()
+    const [orders, setOrders] = useState([])
+    const [loading, setLoading] = useState(true)
 
-    const fetchMyOrders = async () => {
+    const getUserOrders = async () => {
         try {
+            setLoading(true)
             const { data } = await axios.get('/api/order/user')
-            console.log('API Response:', data)
             if (data.success) {
-                setMyOrders(data.orders)
+                setOrders(data.orders)
+            } else {
+                toast.error(data.message)
             }
-
         } catch (error) {
-            console.log(error)
-             toast.error('Failed to fetch orders')
-
+            toast.error(error.message || 'Failed to fetch orders')
+        } finally {
+            setLoading(false)
         }
     }
 
     useEffect(() => {
-        if (user) {
-            fetchMyOrders()
-
+        if (!user) {
+            navigate('/')
+            return
         }
-
+        getUserOrders()
     }, [user])
 
-
+    if (loading) {
+        return (
+            <div className="mt-16 pb-16">
+                <div className="flex justify-center items-center py-20">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                </div>
+            </div>
+        )
+    }
 
     return (
-        <div className='mt-16 pb-16'>
-            <div className='flex flex-col items-end w-max mb-8'>
-                <p className='text-2xl font-medium uppercase'>
+        <div className="mt-16 pb-16">
+            <div className="flex justify-between items-center mb-8">
+                <h1 className="text-3xl font-medium text-gray-800">
                     My Orders
-                </p>
-                <div className='w-16 h-0.5 bg-primary rounded-full'></div>
+                    {orders.length > 0 && (
+                        <span className="text-sm text-primary ml-2">({orders.length} orders)</span>
+                    )}
+                </h1>
             </div>
 
-            {MyOrders && MyOrders.map((order) => (
-                <div key={order._id} className='w-full max-w-5xl border border-gray-300 rounded-lg mb-10 p-4 py-5'>
-                    <p className='flex justify-between flex-wrap text-gray-500 text-sm font-medium mb-4'>
-                        <span>
-                            Order ID: {order._id}
-                        </span>
-                        <span>
-                            Payment: {order.paymentType}
-                        </span>
-                        <span>
-                            Total Amount: {currency} {order.amount}
-                        </span>
-                    </p>
-                    {order.items && order.items.map((item, index) => (
-
-                        <div key={index}
-                            className={`relative bg-white text-gray-500/70 ${order.items.length !== index + 1 && "border-b"} border-gray-300 flex flex-col md:flex-row md:items-center justify-between p-4 py-5 md:gap-16 w-full max-w-5xl`}>
-                            <div className='flex items-center gap-4'>
-                                <div className='bg-primary/10 p-3 rounded-lg'>
-                                    <img src={item.productId?.image[0]} alt="" className='w-16 h-16' />
-                                </div>
-                                <div className='ml-4'>
-                                    <h2 className='text-lg font-semibold text-gray-800'>
-                                        {item.productId?.name}
-                                    </h2>
-                                    <p>
-                                        Category: {item.productId?.category}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className='flex flex-col gap-1 text-sm text-gray-600'>
-                                <p>
-                                    Quantity : {item.quantity || "1"}
-                                </p>
-
-                                <p>
-                                    Status : {order.status}
-                                </p>
-
-                                <p>
-                                    Date : {new Date(order.createdAt).toLocaleDateString()}
-                                </p>
-
-                            </div>
-                            <p className='text-primary text-lg font-medium'>
-                                Amount : {currency}{item.productId?.offerPrice * item.quantity}
-                            </p>
-
-                        </div>
-
+            {orders.length === 0 ? (
+                <div className="text-center py-20">
+                    <div className="mb-6">
+                        <svg className="mx-auto h-24 w-24 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                    </div>
+                    <h3 className="text-xl font-medium text-gray-900 mb-2">No orders yet</h3>
+                    <p className="text-gray-600 mb-6">You haven't placed any orders yet.</p>
+                    <button 
+                        onClick={() => navigate('/products')}
+                        className="bg-primary text-white px-6 py-3 rounded-md hover:bg-primary-dull transition"
+                    >
+                        Start Shopping
+                    </button>
+                </div>
+            ) : (
+                <div className="space-y-6">
+                    {orders.map((order) => (
+                        <OrderDetails key={order._id} order={order} />
                     ))}
                 </div>
-
-            ))}
-
+            )}
         </div>
     )
 }
