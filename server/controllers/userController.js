@@ -168,8 +168,12 @@ export const logout = async (req, res) => {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',  //Use secure cookies in production
             sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',    //CSRF protection
+            path: '/' // Ensure the cookie is cleared for the correct path
 
         });
+
+        res.clearCookie('token');
+        
         return res.json({ success: true, message: 'Logged out' });
     } catch (error) {
         console.error(error.message);

@@ -47,16 +47,23 @@ export const AppContextProvider = ({ children }) => {
       if (data.success) {
         setUser(data.user);
         // Set cart items from user data
-        if (data.user.cartItems) {
+        if (data.user.cartItems && Object.keys(data.user.cartItems).length > 0) {
           setCartItems(data.user.cartItems);
+        } else if (Object.keys(cartItems).length === 0) {
+          // Only set empty cart if current cart is also empty
+          setCartItems(data.user.cartItems || {});
         }
       } else {
         setUser(null);
-        setCartItems({}); // Clear cart on failed auth
+        if (user) {
+          setCartItems({}); // Clear cart on failed auth
+        }
       }
     } catch (error) {
       setUser(null);
-      setCartItems({});
+      if (user) {
+        setCartItems({});
+      }
       console.error("Auth error:", error);
     }
   };
@@ -64,13 +71,16 @@ export const AppContextProvider = ({ children }) => {
   const handleUserChange = (userData) => {
     if (userData) {
       setUser(userData);
-        setCartItems(userData.cartItems || {});
-      
+      if (userData.cartItems) {
+      setCartItems(userData.cartItems);
+      }
+
     } else {
       setUser(null);
       setCartItems({}); // Clear cart when logging out
     }
   }
+
 
   const clearCart = () => {
     setCartItems({});
@@ -148,22 +158,22 @@ export const AppContextProvider = ({ children }) => {
 
 
 
-  
+
   //update database cart items
   useEffect(() => {
-     if (user && Object.keys(cartItems).length > 0) {
-    const updateCart = async () => {
-      try {
-       await axios.post('/api/cart/update', { cartItems });
-       
-      } catch (error) {
-        console.error("Failed to update cart:", error);
-      }
-    };
+    if (user && Object.keys(cartItems).length > 0) {
+      const updateCart = async () => {
+        try {
+          await axios.post('/api/cart/update', { cartItems });
+
+        } catch (error) {
+          console.error("Failed to update cart:", error);
+        }
+      };
 
       updateCart();
-  }
-    
+    }
+
 
   }, [cartItems, user]);
 
