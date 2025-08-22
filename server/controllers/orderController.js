@@ -1,17 +1,55 @@
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 import User from "../models/User.js";
+import Address from "../models/Address.js";
 import stripe from "stripe"
+
+// Validate delivery date (no Sundays, not in past)
+const validateDeliveryDate = (deliveryDate) => {
+    const date = new Date(deliveryDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Check if date is in the past
+    if (date < today) {
+        return { valid: false, message: "Delivery date cannot be in the past" };
+    }
+
+    // Check if it's Sunday (0 = Sunday)
+    if (date.getDay() === 0) {
+        return { valid: false, message: "Delivery not available on Sundays" };
+    }
+
+    return { valid: true };
+};
+
 
 
 // place order COD : /api/order/cod
 export const placeOrderCOD = async (req, res) => {
     try {
-        const { items, address } = req.body;
+        const { items, address, purchaseInfo } = req.body;
         const userId = req.user.id;
 
         if (!address || !items || items.length === 0) {
             return res.json({ success: false, message: "Invalid Data" })
+        }
+
+        // Validate purchase information
+        if (!purchaseInfo) {
+            return res.json({ success: false, message: "Purchase information is required" });
+        }
+
+        const { deliveryDate, deliveryTime, deliveryLocation, username } = purchaseInfo;
+
+        if (!deliveryDate || !deliveryTime || !deliveryLocation || !username) {
+            return res.json({ success: false, message: "Missing required purchase information" });
+        }
+
+        // Validate delivery date
+        const dateValidation = validateDeliveryDate(deliveryDate);
+        if (!dateValidation.valid) {
+            return res.json({ success: false, message: dateValidation.message });
         }
 
         //Calculate amount using items
@@ -46,6 +84,14 @@ export const placeOrderCOD = async (req, res) => {
             amount,
             address,
             paymentType: "COD",
+            purchaseInfo: {
+                username: purchaseInfo.username,
+                orderDate: new Date(),
+                deliveryDate: new Date(purchaseInfo.deliveryDate),
+                deliveryTime: purchaseInfo.deliveryTime,
+                deliveryLocation: purchaseInfo.deliveryLocation,
+                message: purchaseInfo.message || ''
+            }
         });
 
         await User.findByIdAndUpdate(userId, { $set: { cartItems: {} } });
@@ -62,12 +108,29 @@ export const placeOrderCOD = async (req, res) => {
 // place order Stripe : /api/order/stripe
 export const placeOrderStripe = async (req, res) => {
     try {
-        const { items, address } = req.body;
+        const { items, address, purchaseInfo } = req.body;
         const userId = req.user.id;
         const { origin } = req.headers;
 
         if (!address || !items || items.length === 0) {
             return res.json({ success: false, message: "Invalid Data" })
+        }
+
+        // Validate purchase information
+        if (!purchaseInfo) {
+            return res.json({ success: false, message: "Purchase information is required" });
+        }
+
+        const { deliveryDate, deliveryTime, deliveryLocation, username } = purchaseInfo;
+
+        if (!deliveryDate || !deliveryTime || !deliveryLocation || !username) {
+            return res.json({ success: false, message: "Missing required purchase information" });
+        }
+
+        // Validate delivery date
+        const dateValidation = validateDeliveryDate(deliveryDate);
+        if (!dateValidation.valid) {
+            return res.json({ success: false, message: dateValidation.message });
         }
 
         let productData = [];
@@ -115,6 +178,14 @@ export const placeOrderStripe = async (req, res) => {
             amount,
             address,
             paymentType: "Online",
+            purchaseInfo: {
+                username: purchaseInfo.username,
+                orderDate: new Date(),
+                deliveryDate: new Date(purchaseInfo.deliveryDate),
+                deliveryTime: purchaseInfo.deliveryTime,
+                deliveryLocation: purchaseInfo.deliveryLocation,
+                message: purchaseInfo.message || ''
+            }
         });
 
         //stripe gateway
@@ -247,11 +318,29 @@ export const getAllOrders = async (req, res) => {
         console.log('Fetching all orders...');
         const orders = await Order.find({
             $or: [{ paymentType: "COD" }, { isPaid: true }]
-        }).populate('items.productId')
+        }).populate('items.productId', 'name image category offerPrice')
             .populate('address')
             .sort({ createdAt: -1 });
 
         console.log('Found orders:', orders);
+
+        const ordersWithUserInfo = await Promise.all(
+            orders.map(async (order) => {
+                try {
+                    const user = await User.findById(order.userId).select('name email');
+                    return {
+                        ...order.toObject(),
+                        user: user || { name: 'Unknown', email: 'Unknown' }
+                    };
+                } catch (err) {
+                    console.log('Error fetching user for order:', order._id, err.message);
+                    return {
+                        ...order.toObject(),
+                        user: { name: 'Unknown', email: 'Unknown' }
+                    };
+                }
+            })
+        );
 
 
         res.json({ success: true, orders })
