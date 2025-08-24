@@ -5,9 +5,9 @@ import axios from "axios";
 
 axios.defaults.withCredentials = true;
 axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
+axios.defaults.headers.common['Content-Type'] = 'application/json';
 
 export const AppContext = createContext();
-
 export const AppContextProvider = ({ children }) => {
 
   const currency = import.meta.env.VITE_CURRENCY;
@@ -44,35 +44,38 @@ export const AppContextProvider = ({ children }) => {
   const fetchUser = async () => {
     try {
       const { data } = await axios.get('/api/user/is-auth');
-      if (data.success) {
-        setUser(data.user);
-        // Set cart items from user data
-        if (data.user.cartItems && Object.keys(data.user.cartItems).length > 0) {
-          setCartItems(data.user.cartItems);
-        } else if (Object.keys(cartItems).length === 0) {
-          // Only set empty cart if current cart is also empty
-          setCartItems(data.user.cartItems || {});
-        }
-      } else {
-        setUser(null);
-        if (user) {
-          setCartItems({}); // Clear cart on failed auth
-        }
+      console.log('Auth response:', data);
+
+      if (data.success && data.user) {
+      setUser(data.user);
+      // Set cart items from user data
+      if (data.user.cartItems && Object.keys(data.user.cartItems).length > 0) {
+        setCartItems(data.user.cartItems);
+      } else if (Object.keys(cartItems).length === 0) {
+        // Only set empty cart if current cart is also empty
+        setCartItems(data.user.cartItems || {});
       }
-    } catch (error) {
+    } else {
+      // User is not authenticated - this is normal
       setUser(null);
       if (user) {
-        setCartItems({});
+        setCartItems({}); // Clear cart when not authenticated
       }
-      console.error("Auth error:", error);
     }
-  };
+  } catch (error) {
+    console.error("Error checking authentication:", error);
+    setUser(null);
+    if (user) {
+      setCartItems({});
+    }
+  }
+};
 
   const handleUserChange = (userData) => {
     if (userData) {
       setUser(userData);
       if (userData.cartItems) {
-      setCartItems(userData.cartItems);
+        setCartItems(userData.cartItems);
       }
 
     } else {
