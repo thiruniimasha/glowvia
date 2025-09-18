@@ -1,6 +1,6 @@
 # 🌸 Glowvia – Full-Stack E-Commerce Web Application
 
-Glowvia is a **full-stack e-commerce web application** built with React, Redux Toolkit, TailwindCSS, Express, and MongoDB.  
+Glowvia is a **full-stack e-commerce web application** built with React, TailwindCSS, Express, and MongoDB.  
 It allows users to browse products, view product details, manage a shopping cart, and securely handle authentication and payments.  
 The project is structured to meet both academic and real-world standards.
 
@@ -26,7 +26,6 @@ The project is structured to meet both academic and real-world standards.
 - 💰 Manage orders and payments
 
 ### Technical Features
-- ⚡ Global state management with Redux Toolkit
 - 🎨 Responsive and modern UI with TailwindCSS
 - 🌐 REST API integration with Express
 - 🔒 Secure password hashing (bcryptjs) & authentication tokens (JWT)
@@ -41,7 +40,6 @@ The project is structured to meet both academic and real-world standards.
 **Frontend (client):**
 - React 19
 - React Router DOM 7
-- Redux Toolkit + React Redux
 - TailwindCSS
 - Axios
 - React Hot Toast
